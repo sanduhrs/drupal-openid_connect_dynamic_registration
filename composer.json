@@ -1,0 +1,13 @@
+{
+    "name": "drupal/openid_connect_dynamic_registration",
+    "description": "OpenID Connect dynamic client registration mechanism.",
+    "type": "drupal-module",
+    "license": "GPL-2-or-later",
+    "authors": [
+        {
+            "name": "sanduhrs",
+            "email": "stefan@auditor.email"
+        }
+    ],
+    "require": {}
+}

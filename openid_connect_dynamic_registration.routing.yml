@@ -1,0 +1,7 @@
+openid_connect_dynamic_registration.registration:
+  path: '/oauth/register'
+  defaults:
+    _controller: '\Drupal\openid_connect_dynamic_registration\Controller\OpenidConnectDynamicRegistrationController::register'
+  methods: [POST]
+  requirements:
+    _access: 'TRUE'
