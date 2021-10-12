@@ -34,10 +34,10 @@ class OpenidConnectDynamicRegistrationController extends ControllerBase {
       'name' => $request->client_name,
       'client_secret' => $client_secret,
       'redirect_uri' => implode("\n", $request->redirect_uris),
-      'logo_uri' => $request->logo_uri ?: '',
-      'client_uri' => $request->client_uri ?: '',
-      'policy_uri' => $request->policy_uri ?: '',
-      'tos_uri' => $request->tos_uri ?: '',
+      'logo_uri' => $request->logo_uri ?? '',
+      'client_uri' => $request->client_uri ?? '',
+      'policy_uri' => $request->policy_uri ?? '',
+      'tos_uri' => $request->tos_uri ?? '',
     ];
 
     if (
