@@ -28,12 +28,24 @@ class OpenidConnectDynamicRegistrationController extends ControllerBase {
     // @see https://openid.net/specs/openid-connect-registration-1_0.html#rfc.section.3.1
     $content = \Drupal::requestStack()->getCurrentRequest()->getContent();
     $request = json_decode($content);
+
+    // @todo Check all uris are valid.
+    if (!isset($request->redirect_uris)) {
+      // @see https://openid.net/specs/openid-connect-registration-1_0.html#rfc.section.3.3
+      $response = [
+        'error' => 'invalid_redirect_uri',
+        'error_description' => 'One or more redirect_uri values are invalid',
+      ];
+      return new JsonResponse($response, 400);
+    }
+
     $values = [
-      'client_name' => $request->client_name,
-      'server_id' => '',
-      'name' => $request->client_name,
+      'server_id' => 'iam',
+      'client_id' => $request->client_id ?? (new Random)->name(36),
+      'client_name' => $request->client_name ?? (new Random)->name(36),
+      'name' => $request->client_name ?? (new Random)->name(36),
       'client_secret' => $client_secret,
-      'redirect_uri' => implode("\n", $request->redirect_uris),
+      'redirect_uri' => isset($request->redirect_uris) ? implode("\n", $request->redirect_uris) : '',
       'logo_uri' => $request->logo_uri ?? '',
       'client_uri' => $request->client_uri ?? '',
       'policy_uri' => $request->policy_uri ?? '',
@@ -61,12 +73,12 @@ class OpenidConnectDynamicRegistrationController extends ControllerBase {
       return new JsonResponse($response, 400);
     }
 
+    // @todo Add all saved field values.
     // @see https://openid.net/specs/openid-connect-registration-1_0.html#rfc.section.3.2
     $response = array_merge([
       'client_id' => $client->client_id,
       'client_secret' => $client->client_secret,
-    ], [
-      'client_name' => $request->client_name,
+      'client_name' => $client->client_name,
     ]);
 
     if (isset($file)) {
