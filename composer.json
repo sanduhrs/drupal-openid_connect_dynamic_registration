@@ -9,5 +9,7 @@
             "email": "stefan@auditor.email"
         }
     ],
-    "require": {}
+    "require": {
+        "ext-json": "*"
+    }
 }

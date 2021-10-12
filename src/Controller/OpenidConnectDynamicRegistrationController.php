@@ -3,10 +3,9 @@
 namespace Drupal\openid_connect_dynamic_registration\Controller;
 
 use Drupal\Component\Utility\Random;
-use Drupal\consumers\Entity\Consumer;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\File\FileSystem;
-use Drupal\Core\Language\Language;
+use Drupal\oauth2_server\Entity\Client;
 use Laminas\Diactoros\Response\JsonResponse;
 
 /**
@@ -30,13 +29,15 @@ class OpenidConnectDynamicRegistrationController extends ControllerBase {
     $content = \Drupal::requestStack()->getCurrentRequest()->getContent();
     $request = json_decode($content);
     $values = [
-      'langcode' => Language::LANGCODE_DEFAULT,
-      'label' => $request->client_name,
-      'third_party' => TRUE,
-      'is_default' => FALSE,
-      'secret' => $client_secret,
-      'user_id' => 0,
-      'redirect' => implode("\n", $request->redirect_uris),
+      'client_name' => $request->client_name,
+      'server_id' => '',
+      'name' => $request->client_name,
+      'client_secret' => $client_secret,
+      'redirect_uri' => implode("\n", $request->redirect_uris),
+      'logo_uri' => $request->logo_uri ?: '',
+      'client_uri' => $request->client_uri ?: '',
+      'policy_uri' => $request->policy_uri ?: '',
+      'tos_uri' => $request->tos_uri ?: '',
     ];
 
     if (
@@ -47,9 +48,9 @@ class OpenidConnectDynamicRegistrationController extends ControllerBase {
       $values['image'] = $file->id();
     }
 
-    $consumer = Consumer::create($values);
+    $client = Client::create($values);
     try {
-      $consumer->save();
+      $client->save();
     }
     catch (\Exception $e) {
       // @see https://openid.net/specs/openid-connect-registration-1_0.html#rfc.section.3.3
@@ -62,8 +63,8 @@ class OpenidConnectDynamicRegistrationController extends ControllerBase {
 
     // @see https://openid.net/specs/openid-connect-registration-1_0.html#rfc.section.3.2
     $response = array_merge([
-      'client_id' => $consumer->uuid(),
-      'client_secret' => $client_secret,
+      'client_id' => $client->client_id,
+      'client_secret' => $client->client_secret,
     ], [
       'client_name' => $request->client_name,
     ]);

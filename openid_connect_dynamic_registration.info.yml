@@ -4,4 +4,4 @@ description: OpenID Connect dynamic client registration mechanism.
 package: User authentication
 core_version_requirement: ^8 || ^9
 dependencies:
-  - simple_oauth
+  - oauth2_server
