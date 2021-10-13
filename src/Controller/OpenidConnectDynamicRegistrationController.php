@@ -22,9 +22,6 @@ class OpenidConnectDynamicRegistrationController extends ControllerBase {
    * @see https://www.drupal.org/project/rate_limits
    */
   public function register() : JsonResponse {
-    $random = new Random();
-    $client_secret = $random->string(64);
-
     // @see https://openid.net/specs/openid-connect-registration-1_0.html#rfc.section.3.1
     $content = \Drupal::requestStack()->getCurrentRequest()->getContent();
     $request = json_decode($content);
@@ -41,16 +38,20 @@ class OpenidConnectDynamicRegistrationController extends ControllerBase {
 
     $values = [
       'server_id' => 'iam',
-      'client_id' => $request->client_id ?? (new Random)->name(36),
       'client_name' => $request->client_name ?? (new Random)->name(36),
       'name' => $request->client_name ?? (new Random)->name(36),
-      'client_secret' => $client_secret,
       'redirect_uri' => isset($request->redirect_uris) ? implode("\n", $request->redirect_uris) : '',
       'logo_uri' => $request->logo_uri ?? '',
       'client_uri' => $request->client_uri ?? '',
       'policy_uri' => $request->policy_uri ?? '',
       'tos_uri' => $request->tos_uri ?? '',
     ];
+
+    /** @var \Drupal\Core\Password\PasswordInterface $password */
+    $password = \Drupal::service('password');
+    $values['client_id'] = strtolower((new Random)->name(32));
+    $unhashed_client_secret = (new Random)->name(64);
+    $values['client_secret'] = $password->hash($unhashed_client_secret);
 
     if (
       isset($request->logo_uri) &&
@@ -77,7 +78,7 @@ class OpenidConnectDynamicRegistrationController extends ControllerBase {
     // @see https://openid.net/specs/openid-connect-registration-1_0.html#rfc.section.3.2
     $response = array_merge([
       'client_id' => $client->client_id,
-      'client_secret' => $client->client_secret,
+      'client_secret' => $unhashed_client_secret,
       'client_name' => $client->client_name,
     ]);
 
